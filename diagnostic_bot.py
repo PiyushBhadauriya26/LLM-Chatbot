@@ -3,7 +3,7 @@ from tenacity import retry, wait_random_exponential, stop_after_attempt
 from dotenv import load_dotenv
 from openai import OpenAI
 import json
-from function_calling import available_functions
+from function_calling import available_functions, tools
 
 load_dotenv()
 client = OpenAI()
@@ -14,29 +14,7 @@ class Diagnostic_bot:
 
     def __init__(self, model=GPT_MODEL):
         self.model = model
-        self.tools = [
-            {
-                "type": "function",
-                "function": {
-                    "name": "send_email",
-                    "description": "Send an email to patient with Diagnosis Result",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "to_email": {
-                                "type": "string",
-                                "description": "the recipient email address",
-                            },
-                            "msg": {
-                                "type": "string",
-                                "description": "Body of the email with Diagnosis Result",
-                            },
-                        },
-                        "required": ["to_email", "msg"],
-                    },
-                }
-            },
-        ]
+        self.tools = tools
         self.chatContext = [
             {'role': 'system', 'content': f"""
             I want you to act as a virtual doctor.
@@ -55,8 +33,10 @@ class Diagnostic_bot:
             Go step by step :
                 - Ask user to provide users' email during welcome , repeat asking for user email until user provide one.
                 - If user don't provide email, inform that you can't help without user email, and repeat previous step, else Thank user for providing email and move to next step
-                - Ask user how user is feeling.
+                - Ask user how user is feeling and if he has any symptoms.
                 - Based on user provided symptoms if needed more information for diagnosis , ask max 2-3 follow up questions.
+                - if enough information is provided for diagnosis, proceed to next step. else ask user to provide more information.
+                - Get context for the symptoms using retrieve_knowledge function.
                 - Provide a diagnosis and precaution plan based on the provided context and symptoms.
                 - ask user if they want email summary of diagnosis.
                 - if user respond yes , give message that email is sent to users email , else say thank you.
@@ -92,12 +72,18 @@ class Diagnostic_bot:
                     function_name = tool_call.function.name
                     print("GPT to call! function: ", function_name)
                     function_args = json.loads(tool_call.function.arguments)
+                    print("function_args: ", function_args)
                     if function_name in available_functions:
                         function_to_call = available_functions[function_name]
-                        function_response = function_to_call(
-                            to_email=function_args.get("to_email"),
-                            msg=function_args.get("msg")
-                        )
+                        if function_name == "retrieve_knowledge":
+                            function_response = function_to_call(
+                                symptoms=function_args.get("symptoms")
+                            )
+                        elif function_name == "send_email":
+                            function_response = function_to_call(
+                                to_email=function_args.get("to_email"),
+                                msg=function_args.get("msg")
+                            )
                         self.chatContext.append(
                             {
                                 "tool_call_id": tool_call.id,
