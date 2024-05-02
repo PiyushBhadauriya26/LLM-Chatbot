@@ -1,6 +1,7 @@
 from sendgrid.helpers.mail import *
 import sendgrid
 from dotenv import load_dotenv
+import os
 load_dotenv()
 def send_email(to_email, msg):
     try:

@@ -2,9 +2,9 @@ from flask import Flask, render_template, request
 from diagnostic_bot import Diagnostic_bot
 
 app = Flask(__name__)
+d_bot = Diagnostic_bot()
 def get_completion(prompt, model="gpt-3.5-turbo"):
     messages = {"role": "user", "content": prompt}
-    d_bot = Diagnostic_bot()
     response = d_bot.chat_completion_request(messages,model=model)
     print(response)
     return response

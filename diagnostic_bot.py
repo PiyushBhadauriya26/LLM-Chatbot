@@ -87,6 +87,7 @@ class Diagnostic_bot:
                 self.chatContext.append({"role": "assistant", "content": res})
                 return res
             else:
+                self.chatContext.append(response.choices[0].message)
                 for tool_call in tool_calls:
                     function_name = tool_call.function.name
                     print("GPT to call! function: ", function_name)
