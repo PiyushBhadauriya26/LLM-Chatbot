@@ -4,17 +4,40 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import json
 from function_calling import available_functions, tools
+import logging
+from logging.handlers import RotatingFileHandler
 
-load_dotenv()
-client = OpenAI()
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv() 
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
 
 
 class Diagnostic_bot:
     GPT_MODEL = "gpt-3.5-turbo"
+    logger = logging.getLogger("ChatBotLogger")
+    logger.setLevel(logging.INFO)
+    handler = RotatingFileHandler("chat_log.txt", maxBytes=10000, backupCount=5)
+    formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
     def __init__(self, model=GPT_MODEL):
         self.model = model
         self.tools = tools
+        # Initialize the logger as an instance variable
+        self.logger = logging.getLogger("ChatBotLogger")
+        self.logger.setLevel(logging.INFO)
+        handler = RotatingFileHandler("chat_log.txt", maxBytes=10000, backupCount=5)
+        formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+
+        self.chatContext = []
+        self.logger.info("Diagnostic_bot instance created.")
         self.chatContext = [
             {'role': 'system', 'content': f"""
             I want you to act as a virtual doctor.
@@ -110,3 +133,7 @@ class Diagnostic_bot:
             print(f"Exception: {e}")
             return "Sorry I am unable to process your request at the moment. Please try again later."
 
+
+    def log_chat_interaction(self, user_message, bot_response):
+        self.logger.info(f"User: {user_message}")
+        self.logger.info(f"Bot: {bot_response}")
