@@ -1,4 +1,3 @@
-import os
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -13,8 +12,10 @@ class Diagnostic_bot:
     GPT_MODEL = "gpt-3.5-turbo"
 
     def __init__(self, model=GPT_MODEL):
+        self.file_name = None
         self.model = model
         self.tools = tools
+        self.is_email_added = False
         self.chatContext = [
             {'role': 'system', 'content': f"""
             I want you to act as a virtual doctor.
@@ -32,12 +33,17 @@ class Diagnostic_bot:
     
             Go step by step :
                 - Ask user to provide users' email during welcome , repeat asking for user email until user provide one.
-                - If user don't provide email, inform that you can't help without user email, and repeat previous step, else Thank user for providing email and move to next step
+                - If user don't provide email, inform that you can't help without user email, and repeat previous step
+                - if user provides email, retrieve chat history using search_chat_history.
+                - if search_chat_history returns meaningful chat history , thank user along with summarized 50 words for each diagnosis in history else Thank user for email.
                 - Ask user how user is feeling and if he has any symptoms.
                 - Based on user provided symptoms if needed more information for diagnosis , ask max 2-3 follow up questions.
                 - if enough information is provided for diagnosis, proceed to next step. else ask user to provide more information.
                 - Get context for the symptoms using retrieve_knowledge function.
                 - Provide a diagnosis and precaution plan based on the provided context and symptoms.
+                - Ask user if they want to save summary of diagnosis for future.
+                - if user respond yes , save summary of diagnosis using save_chat_history
+                - Save provided diagnosis and precaution plan summary for future using save_chat_history and move to next step.
                 - ask user if they want email summary of diagnosis.
                 - if user respond yes , give message that email is sent to users email , else say thank you.
                 - Say bye to user.
@@ -51,7 +57,6 @@ class Diagnostic_bot:
         if tool_choice is None:
             tool_choice = "auto"
         self.chatContext.append(messages)
-        #print("Chat Context: ", self.chatContext)
         try:
             response = client.chat.completions.create(
                 model=model,
@@ -84,6 +89,20 @@ class Diagnostic_bot:
                                 to_email=function_args.get("to_email"),
                                 msg=function_args.get("msg")
                             )
+                        elif function_name == "search_chat_history":
+                            email = function_args.get("email")
+                            function_response = function_to_call(
+                                user_email=email
+                            )
+                            self.is_email_added = True
+                            self.file_name = str(email) + ".json"
+                        elif function_name == 'save_chat_history':
+                            email = function_args.get("email")
+                            function_response = function_to_call(
+                                file_name_to_save=self.file_name,
+                                chat_summary=function_args.get("chat_summary")
+                            )
+
                         self.chatContext.append(
                             {
                                 "tool_call_id": tool_call.id,
@@ -110,3 +129,5 @@ class Diagnostic_bot:
             print(f"Exception: {e}")
             return "Sorry I am unable to process your request at the moment. Please try again later."
 
+    def is_email_provided(self):
+        return self.is_email_added
