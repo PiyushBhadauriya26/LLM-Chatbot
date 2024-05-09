@@ -2,11 +2,17 @@ from sendgrid.helpers.mail import *
 import sendgrid
 from dotenv import load_dotenv
 import os
+import os.path
+import json
+import datetime
+
 load_dotenv()
 from vectordb import Pinecode_DB
 
 vector_db = Pinecode_DB()
 sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
+
+
 def send_email(to_email, msg):
     try:
         #ADD EMAIL before running
@@ -22,6 +28,7 @@ def send_email(to_email, msg):
     else:
         return "Success! sent email to {}".format(to_email.email)
 
+
 def retrieve_knowledge(symptoms):
     query = f"User Input: I have {symptoms}."
     # print(query)
@@ -29,11 +36,87 @@ def retrieve_knowledge(symptoms):
     print(kb)
     return kb
 
+
+def search_chat_history(user_email):
+    file = user_email + ".json"
+
+    if os.path.isfile(file):
+        with open(file, 'r+') as file:
+            # First we load existing data into a dict.
+            file_data = json.load(file)
+
+            if len(file_data["chat"]) > 0:
+                return ' Here is user chat history: ' + str(file_data["chat"])
+
+            return 'No Chat history found'
+
+    else:
+        a_dict = {
+            'chat': []
+        }
+
+        with open(file, 'w') as outfile:
+            json.dump(a_dict, outfile)
+
+        return 'No Chat history found'
+
+
+def save_chat_history(file_name_to_save, chat_summary):
+    dt = datetime.datetime.now()
+
+    with open(file_name_to_save, 'r+') as file:
+        file_data = json.load(file)
+        # Join new_data with file_data inside emp_details
+        file_data["chat"].append({'date-time': str(dt), 'chat summary': chat_summary})
+        # Sets file's current position at offset.
+        file.seek(0)
+        # convert back to json.
+        json.dump(file_data, file, indent=4)
+
+        return "Summary Saved"
+
+
 available_functions = {
     "send_email": send_email,
-    "retrieve_knowledge": retrieve_knowledge
+    "retrieve_knowledge": retrieve_knowledge,
+    "search_chat_history": search_chat_history,
+    "save_chat_history": save_chat_history
 }
 tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "save_chat_history",
+            "description": "chat summary for future",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "chat_summary": {
+                        "type": "string",
+                        "description": "recent diagnosis summary ",
+                    },
+                },
+                "required": ["chat_summary"],
+            },
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_chat_history",
+            "description": "search chat history",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "description": "the recipient email address",
+                    },
+                },
+                "required": ["email"],
+            },
+        }
+    },
     {
         "type": "function",
         "function": {
