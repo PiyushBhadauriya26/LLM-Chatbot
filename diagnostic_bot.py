@@ -3,6 +3,12 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import json
 from function_calling import available_functions, tools
+import logging
+from logging.handlers import RotatingFileHandler
+
+from dotenv import load_dotenv
+import os
+
 
 load_dotenv()
 client = OpenAI()
@@ -10,12 +16,28 @@ client = OpenAI()
 
 class Diagnostic_bot:
     GPT_MODEL = "gpt-3.5-turbo"
+    logger = logging.getLogger("ChatBotLogger")
+    logger.setLevel(logging.INFO)
+    handler = RotatingFileHandler("chat_log.txt", maxBytes=10000, backupCount=5)
+    formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
     def __init__(self, model=GPT_MODEL):
         self.file_name = None
         self.model = model
         self.tools = tools
         self.is_email_added = False
+        # Initialize the logger as an instance variable
+        self.logger = logging.getLogger("ChatBotLogger")
+        self.logger.setLevel(logging.INFO)
+        handler = RotatingFileHandler("chat_log.txt", maxBytes=10000, backupCount=5)
+        formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+
+        self.chatContext = []
+        self.logger.info("Diagnostic_bot instance created.")
         self.chatContext = [
             {'role': 'system', 'content': f"""
             I want you to act as a virtual doctor.
@@ -131,3 +153,7 @@ class Diagnostic_bot:
 
     def is_email_provided(self):
         return self.is_email_added
+
+    def log_chat_interaction(self, user_message, bot_response):
+        self.logger.info(f"User: {user_message}")
+        self.logger.info(f"Bot: {bot_response}")

@@ -15,7 +15,8 @@ sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
 
 def send_email(to_email, msg):
     try:
-        from_email = Email("coolpiyushsingh@gmail.com")
+        #ADD EMAIL before running
+        from_email = Email("")
         to_email = To(to_email)
         subject = "Diagnosis Result"
         content = Content("text/plain", msg)
