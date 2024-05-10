@@ -7,6 +7,7 @@ d_bot = Diagnostic_bot()
 
 def get_completion(prompt, model="gpt-3.5-turbo"):
     messages = {"role": "user", "content": prompt}
+    print(prompt)
     response = d_bot.chat_completion_request(messages, model=model)
     print(response)
     d_bot.log_chat_interaction(prompt, response) 

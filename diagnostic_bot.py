@@ -1,5 +1,4 @@
 from tenacity import retry, wait_random_exponential, stop_after_attempt
-from dotenv import load_dotenv
 from openai import OpenAI
 import json
 from function_calling import available_functions, tools
@@ -16,12 +15,12 @@ client = OpenAI()
 
 class Diagnostic_bot:
     GPT_MODEL = "gpt-3.5-turbo"
-    logger = logging.getLogger("ChatBotLogger")
-    logger.setLevel(logging.INFO)
-    handler = RotatingFileHandler("chat_log.txt", maxBytes=10000, backupCount=5)
-    formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+    # logger = logging.getLogger("ChatBotLogger")
+    # logger.setLevel(logging.INFO)
+    # handler = RotatingFileHandler("chat_log.txt", maxBytes=10000, backupCount=5)
+    # formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    # handler.setFormatter(formatter)
+    # logger.addHandler(handler)
 
     def __init__(self, model=GPT_MODEL):
         self.file_name = None
