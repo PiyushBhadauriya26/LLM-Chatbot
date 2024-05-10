@@ -30,3 +30,5 @@ urllib3==2.2.1
 uuid==1.30
 Werkzeug==3.0.2
 zipp==3.18.1
+PyPDF2
+docopt
