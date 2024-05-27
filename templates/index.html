@@ -3,6 +3,9 @@
 <head>
     <title>GenAI-Bot</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag-commonmark.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag-GitHub.js"></script> 
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <style>
         * {
@@ -13,6 +16,7 @@
             height: 100%;
             margin: 0;
             font-family: Arial;
+            background-color: navajowhite;
         }
         #chatbox {
         margin-left: auto;
@@ -22,6 +26,8 @@
         min-height:400px;
         max-height:500px;
         overflow-y:auto;
+        min-width: 500px;
+        background-color: aliceblue;
       }
       #userInput {
         margin-left: auto;
@@ -29,14 +35,17 @@
         width: 40%;
         margin-top: 60px;
         padding-bottom: 20px;
+        min-width: 500px;
       }
       #textInput {
-        width: 90%;
+        width: 100%;
         border: none;
         border-bottom: 3px solid black;
         font-family: monospace;
         font-size: 17px;
-          height: 40px;
+        height: 40px;
+        background-color: lightgreen;
+        padding-left: 10px;
       }
       .userText {
         color: white;
@@ -44,11 +53,14 @@
         font-size: 17px;
         text-align: right;
         line-height: 30px;
+        margin: 2px;
       }
-      .userText span {
-        background-color: #808080;
+      .userText div {
+        background-color: lightgreen;
         padding: 10px;
-        border-radius: 2px;
+        border-radius: 8px;
+        display: inline-block;
+        text-wrap: pretty;
       }
       .botText {
         color: white;
@@ -56,11 +68,14 @@
         font-size: 17px;
         text-align: left;
         line-height: 30px;
-          background-color: #4169e1;
+        margin: 2px;
+          
       }
-      .botText span {
+      .botText div {
         padding: 10px;
-        border-radius: 2px;
+        border-radius: 8px;
+        display: inline-block;
+        background-color: lightblue;
       }
       #tidbit {
         position: absolute;
@@ -74,6 +89,7 @@
         width: 78%;
         margin-top: 20px;
         border: 1px solid green;
+        background-color: aliceblue;
       }
     </style>
 </head>
@@ -85,9 +101,9 @@
         <div class="boxed">
             <div>
                 <div id="chatbox">
-                    <p class="botText">
-                        <span>Hi! I'm your AI-Generative Chatbot</span>
-                    </p>
+                    <div class="botText">
+                        <div><github-md> Hi! I'm your AI-Generative Chatbot </github-md></div>
+                    </div>
                 </div>
                 <div id="userInput">
                     <input id="textInput" type="text" name="msg" placeholder="Message" />
@@ -96,19 +112,21 @@
             <script>
                 function getBotResponse() {
                     var rawText = $("#textInput").val();
-                    var userHtml = '<p class="userText"><span>' + rawText + "</span></p>";
+                    var userHtml = '<div class="userText"><div> <github-md>' + rawText + " </github-md></div></div>";
                     $("#textInput").val("");
                     $("#chatbox").append(userHtml);
+                    renderMarkdown();
                     document
                         .getElementById("userInput")
                         .scrollIntoView({ block: "start", behavior: "smooth" });
                     $.get("/get", { msg: rawText }).done(function (data) {
-                        var botHtml = '<p class="botText"><span>' + data + "</span></p>";
+                        var botHtml = '<div class="botText"><div> <github-md>' + data + "</github-md></div></div>";
                         $("#chatbox").append(botHtml);
                        document.querySelectorAll(".botText:last-child")[0].scrollIntoView({ block: "start", behavior: "smooth" });
                         {#document#}
                         {#    .getElementById("userInput")#}
                         {#    .scrollIntoView({ block: "start", behavior: "smooth" });#}
+                        renderMarkdown();
                     });
                 }
                 $("#textInput").keypress(function (e) {
@@ -120,4 +138,7 @@
         </div>
     </div>
 </body>
+<script>
+   renderMarkdown();
+</script>
 </html>
