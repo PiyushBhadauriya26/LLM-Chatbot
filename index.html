@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GenAI-Bot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag-commonmark.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag-GitHub.js"></script> 
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box
+        }
+/* Set height of body and the document to 100% */
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial;
+            background-color: navajowhite;
+        }
+        #chatbox {
+        margin-left: auto;
+        margin-right: auto;
+        width: 40%;
+        margin-top: 60px;
+        min-height:400px;
+        max-height:500px;
+        overflow-y:auto;
+        min-width: 500px;
+        background-color: aliceblue;
+      }
+      #userInput {
+        margin-left: auto;
+        margin-right: auto;
+        width: 40%;
+        margin-top: 60px;
+        padding-bottom: 20px;
+        min-width: 500px;
+      }
+      #textInput {
+        width: 100%;
+        border: none;
+        border-bottom: 3px solid black;
+        font-family: monospace;
+        font-size: 17px;
+        height: 40px;
+        background-color: lightgreen;
+        padding-left: 10px;
+      }
+      .userText {
+        color: white;
+        font-family: monospace;
+        font-size: 17px;
+        text-align: right;
+        line-height: 30px;
+        margin: 2px;
+      }
+      .userText div {
+        background-color: lightgreen;
+        padding: 10px;
+        border-radius: 8px;
+        display: inline-block;
+        text-wrap: pretty;
+      }
+      .botText {
+        color: white;
+        font-family: monospace;
+        font-size: 17px;
+        text-align: left;
+        line-height: 30px;
+        margin: 2px;
+          
+      }
+      .botText div {
+        padding: 10px;
+        border-radius: 8px;
+        display: inline-block;
+        background-color: lightblue;
+      }
+      #tidbit {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 300px;
+      }
+      .boxed {
+        margin-left: auto;
+        margin-right: auto;
+        width: 78%;
+        margin-top: 20px;
+        border: 1px solid green;
+        background-color: aliceblue;
+      }
+    </style>
+</head>
+<body>
+<div>
+        <h1 align="center"><b>AI-Gen ChatBot</b></h1>
+        <h4 align="center"><b>Please start your personalized interaction with the chatbot</b></h4>
+        <p align="center"><img src="static\\chatbot1.png" alt="Python-BOT" height="210" width="220"></p>
+        <div class="boxed">
+            <div>
+                <div id="chatbox">
+                    <div class="botText">
+                        <div><github-md> Hi! I'm your AI-Generative Chatbot </github-md></div>
+                    </div>
+                </div>
+                <div id="userInput">
+                    <input id="textInput" type="text" name="msg" placeholder="Message" />
+                </div>
+            </div>
+            <script>
+                function getBotResponse() {
+                    var rawText = $("#textInput").val();
+                    var userHtml = '<div class="userText"><div> <github-md>' + rawText + " </github-md></div></div>";
+                    $("#textInput").val("");
+                    $("#chatbox").append(userHtml);
+                    renderMarkdown();
+                    document
+                        .getElementById("userInput")
+                        .scrollIntoView({ block: "start", behavior: "smooth" });
+                    $.get("/get", { msg: rawText }).done(function (data) {
+                        var botHtml = '<div class="botText"><div> <github-md>' + data + "</github-md></div></div>";
+                        $("#chatbox").append(botHtml);
+                       document.querySelectorAll(".botText:last-child")[0].scrollIntoView({ block: "start", behavior: "smooth" });
+                        {#document#}
+                        {#    .getElementById("userInput")#}
+                        {#    .scrollIntoView({ block: "start", behavior: "smooth" });#}
+                        renderMarkdown();
+                    });
+                }
+                $("#textInput").keypress(function (e) {
+                    if (e.which == 13) {
+                        getBotResponse();
+                    }
+                });
+            </script>
+        </div>
+    </div>
+</body>
+<script>
+   renderMarkdown();
+</script>
+</html>
