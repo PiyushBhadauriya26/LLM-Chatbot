@@ -1,4 +1,5 @@
 from sendgrid.helpers.mail import *
+from data.sqlitedb import SqliteDB
 import sendgrid
 from dotenv import load_dotenv
 import os
@@ -6,6 +7,7 @@ import os.path
 import json
 import datetime
 import requests
+
 
 load_dotenv()
 from vectordb import Pinecode_DB
@@ -25,6 +27,8 @@ def send_email(to_email, msg):
         response = sg.client.mail.send.post(request_body=mail.get())
     except Exception as e:
         print(e)
+        print(response.body)
+        print(response.headers)
         return "Error! Failed to send email."
     else:
         return "Success! sent email to {}".format(to_email.email)
@@ -76,7 +80,10 @@ def save_chat_history(file_name_to_save, chat_summary):
 
         return "Summary Saved"
 
-
+def book_appointment(doctor_name, doctor_phone, patient_email, timeslot, location):
+    sqlite_db = SqliteDB()
+    sqlite_db.insert_values([doctor_name, doctor_phone, patient_email, timeslot, location])
+    
 # To get latitude ,longitude and location details for matching name of a location
 def get_location_coordinate(location, max_no_of_matched=1):
     # print(location,max_no_of_matched)
@@ -299,7 +306,8 @@ available_functions = {
     "search_chat_history": search_chat_history,
     "save_chat_history": save_chat_history,
     "get_location_coordinate": get_location_coordinate,
-    "get_available_appointments": get_available_appointments
+    "get_available_appointments": get_available_appointments,
+    "book_appointment": book_appointment
 }
 
 tools = [
@@ -418,5 +426,29 @@ tools = [
                 "required": ["symptoms"],
             },
         },
+    },
+{
+        "type": "function",
+        "function": {
+            "name": "book_appointment",
+            "description": "Save appointment details to the database",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "doctor_name": {
+                        "type": "string",
+                        "description": "Name of the doctor.",
+                    },
+                    "doctor_phone": {
+                        "type": "string",
+                        "description": "Doctor's Contact Number. example : +1 646 371-0412",
+                    },
+                    "patient_email": {"type": "string", "description": "Email address of the patient."},
+                    "timeslot": {"type": "string", "description": "Appointment time slot in the Format MM-DD-YY:HH:MM AM/PM"},
+                    "location": {"type": "string", "description": "Location of the appointment."},
+                },
+                "required": ["doctor_name", "doctor_phone", "patient_email", "timeslot", "location"],
+            },
+        }
     }
 ]
