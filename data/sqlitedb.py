@@ -1,4 +1,3 @@
-
 # create a class sqlitebd using sqlite3 lib with the following methods:
 #     - __init__(): Initialize the sqlitebd object with the database name.
 #     - create_table(): Create a table with the name provided.
@@ -11,7 +10,7 @@ import sqlite3
 
 class SqliteDB:
     def __init__(self, db_name="appointments.db"):
-        self.conn = sqlite3.connect(db_name)
+        self.conn = sqlite3.connect(db_name, check_same_thread=False)
         self.cursor = self.conn.cursor()
         if not self.cursor:
             print("Error connecting to database")
@@ -31,10 +30,15 @@ class SqliteDB:
         placeholders = ', '.join(['?' for _ in values])
         self.cursor.execute(f"INSERT INTO {table_name}(doctor_name, doctor_phone, patient_email, appointment_timeslot, location) VALUES ({placeholders})", values)
         self.conn.commit()
+        return f"Appointments Booked successfully"
 
     def fetch_values(self,patient_email, table_name="dr_appointments"):
         self.cursor.execute(f"SELECT * FROM {table_name} WHERE patient_email='{patient_email}'")
-        return self.cursor.fetchall()
+        appt = self.cursor.fetchall()
+        if appt:
+            return appt
+        else:
+            return f"No appointments found for this email:{patient_email}."
 
     def update_values(self, set_statement, where_statement, table_name="dr_appointments"):
         self.cursor.execute(f"UPDATE {table_name} SET {set_statement} WHERE {where_statement}")

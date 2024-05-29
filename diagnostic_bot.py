@@ -55,7 +55,7 @@ class Diagnostic_bot:
             Go step by step :
                 - Ask user to provide users' email during welcome , repeat asking for user email until user provide one.
                 - If user don't provide email, inform that you can't help without user email, and repeat previous step
-                - if user provides email, retrieve chat history using search_chat_history. if search_chat_history return meaningful chat history , thank user along with summarized 50 words for each diagnosis in history else Thank user for email.
+                - if user provides email, retrieve chat history using search_chat_history. if search_chat_history return meaningful chat history and appointment details, thank user along with upcoming appointmnets and summarized 50 words for each diagnosis in history else Thank user for email.
                 - Ask user how user is feeling and if he has any symptoms.
                 - Based on user provided symptoms if needed more information for diagnosis , ask max 2-3 follow up questions.
                 - if enough information is provided for diagnosis, proceed to next step. else ask user to provide more information.
