@@ -3,8 +3,9 @@
 <head>
     <title>GenAI-Bot</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag-commonmark.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag-commonmark.js"></script> -->
     <!-- <script src="https://cdn.jsdelivr.net/gh/MarketingPipeline/Markdown-Tag/markdown-tag-GitHub.js"></script>  -->
+    <script type="module" src="https://md-block.verou.me/md-block.js"></script>
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -99,7 +100,7 @@
             <div>
                 <div id="chatbox">
                     <div class="botText">
-                        <div><md> Hi! I'm your AI-Generative Chatbot </md></div>
+                        <div><md-block> Hi! I'm your AI-Generative Chatbot </md></div>
                     </div>
                 </div>
                 <div id="userInput">
@@ -109,21 +110,21 @@
             <script>
                 function getBotResponse() {
                     var rawText = $("#textInput").val();
-                    var userHtml = '<div class="userText"><div> <md>' + rawText + " </md></div></div>";
+                    var userHtml = '<div class="userText"><div> <md-block>' + rawText + " </md></div></div>";
                     $("#textInput").val("");
                     $("#chatbox").append(userHtml);
-                    renderMarkdown();
+                    // renderMarkdown();
                     document
                         .getElementById("userInput")
                         .scrollIntoView({ block: "start", behavior: "smooth" });
                     $.get("/get", { msg: rawText }).done(function (data) {
-                        var botHtml = '<div class="botText"><div> <md>' + data + "</md></div></div>";
+                        var botHtml = '<div class="botText"><div> <md-block>' + data + "</md></div></div>";
                         $("#chatbox").append(botHtml);
                        document.querySelectorAll(".botText:last-child")[0].scrollIntoView({ block: "start", behavior: "smooth" });
                         {#document#}
                         {#    .getElementById("userInput")#}
                         {#    .scrollIntoView({ block: "start", behavior: "smooth" });#}
-                        renderMarkdown();
+                        //renderMarkdown();
                     });
                 }
                 $("#textInput").keypress(function (e) {
@@ -136,6 +137,6 @@
     </div>
 </body>
 <script>
-   renderMarkdown();
+   //renderMarkdown();
 </script>
 </html>
