@@ -1,4 +1,5 @@
 from sendgrid.helpers.mail import *
+from data.sqlitedb import SqliteDB
 import sendgrid
 from dotenv import load_dotenv
 import os
@@ -7,17 +8,16 @@ import json
 import datetime
 import requests
 
+
 load_dotenv()
 from vectordb import Pinecode_DB
-
 vector_db = Pinecode_DB()
 sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
-
+sqlite_db = SqliteDB()
 
 def send_email(to_email, msg):
-    try:
-        # ADD EMAIL before running
-        from_email = Email("")
+    try :
+        from_email = Email("coolpiyushsingh@gmail.com")
         to_email = To(to_email)
         subject = "Diagnosis Result"
         content = Content("text/plain", msg)
@@ -40,25 +40,21 @@ def retrieve_knowledge(symptoms):
 
 def search_chat_history(user_email):
     file = user_email + ".json"
-
+    appointment = check_appointment(user_email)
     if os.path.isfile(file):
         with open(file, 'r+') as file:
             # First we load existing data into a dict.
             file_data = json.load(file)
-
             if len(file_data["chat"]) > 0:
-                return ' Here is user chat history: ' + str(file_data["chat"])
-
+                return f'Appointments: {appointment}. Chat history: {str(file_data["chat"])}'
             return 'No Chat history found'
 
     else:
         a_dict = {
             'chat': []
         }
-
         with open(file, 'w') as outfile:
             json.dump(a_dict, outfile)
-
         return 'No Chat history found'
 
 
@@ -76,7 +72,12 @@ def save_chat_history(file_name_to_save, chat_summary):
 
         return "Summary Saved"
 
+def book_appointment(doctor_name, doctor_phone, patient_email, timeslot, location):
+    return sqlite_db.insert_values([doctor_name, doctor_phone, patient_email, timeslot, location])
 
+def check_appointment(patient_email):
+    return sqlite_db.fetch_values(patient_email)
+    
 # To get latitude ,longitude and location details for matching name of a location
 def get_location_coordinate(location, max_no_of_matched=1):
     # print(location,max_no_of_matched)
@@ -299,7 +300,9 @@ available_functions = {
     "search_chat_history": search_chat_history,
     "save_chat_history": save_chat_history,
     "get_location_coordinate": get_location_coordinate,
-    "get_available_appointments": get_available_appointments
+    "get_available_appointments": get_available_appointments,
+    "book_appointment": book_appointment,
+    "check_appointment": check_appointment
 }
 
 tools = [
@@ -418,5 +421,43 @@ tools = [
                 "required": ["symptoms"],
             },
         },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "book_appointment",
+            "description": "Save appointment details to the database",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "doctor_name": {
+                        "type": "string",
+                        "description": "Name of the doctor.",
+                    },
+                    "doctor_phone": {
+                        "type": "string",
+                        "description": "Doctor's Contact Number. example : +1 646 371-0412",
+                    },
+                    "patient_email": {"type": "string", "description": "Email address of the patient."},
+                    "timeslot": {"type": "string", "description": "Appointment time slot in the Format MM-DD-YY:HH:MM AM/PM"},
+                    "location": {"type": "string", "description": "Location of the appointment."},
+                },
+                "required": ["doctor_name", "doctor_phone", "patient_email", "timeslot", "location"],
+            },
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "check_appointment",
+            "description": "Search appointment details from the database",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "patient_email": {"type": "string", "description": "Email address of the patient."},
+                },
+                "required": ["patient_email"],
+            },
+        }
     }
 ]

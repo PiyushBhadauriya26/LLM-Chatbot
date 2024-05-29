@@ -55,7 +55,7 @@ class Diagnostic_bot:
             Go step by step :
                 - Ask user to provide users' email during welcome , repeat asking for user email until user provide one.
                 - If user don't provide email, inform that you can't help without user email, and repeat previous step
-                - if user provides email, retrieve chat history using search_chat_history. if search_chat_history return meaningful chat history , thank user along with summarized 50 words for each diagnosis in history else Thank user for email.
+                - if user provides email, retrieve chat history using search_chat_history. if search_chat_history return meaningful chat history and appointment details, thank user along with upcoming appointmnets and summarized 50 words for each diagnosis in history else Thank user for email.
                 - Ask user how user is feeling and if he has any symptoms.
                 - Based on user provided symptoms if needed more information for diagnosis , ask max 2-3 follow up questions.
                 - if enough information is provided for diagnosis, proceed to next step. else ask user to provide more information.
@@ -126,6 +126,8 @@ class Diagnostic_bot:
                             longitude=function_args.get("longitude"),
                             state=function_args.get("state")
                         )
+                    else:
+                        function_response = function_to_call(**function_args)
 
                     print(function_response)
                     self.chatContext.append(
@@ -182,68 +184,6 @@ class Diagnostic_bot:
                 res = self.call_function_if_needed(response_message, temperature, tools, tool_choice, model)
                 self.chatContext.append({"role": "assistant", "content": res})
                 return res
-                # self.chatContext.append(response.choices[0].message)
-                # for tool_call in tool_calls:
-                #     function_name = tool_call.function.name
-                #     print("GPT to call! function: ", function_name)
-                #     function_args = json.loads(tool_call.function.arguments)
-                #     print("function_args: ", function_args)
-                #     if function_name in available_functions:
-                #         function_to_call = available_functions[function_name]
-                #         if function_name == "retrieve_knowledge":
-                #             function_response = function_to_call(
-                #                 symptoms=function_args.get("symptoms")
-                #             )
-                #         elif function_name == "send_email":
-                #             function_response = function_to_call(
-                #                 to_email=function_args.get("to_email"),
-                #                 msg=function_args.get("msg")
-                #             )
-                #         elif function_name == "search_chat_history":
-                #             email = function_args.get("email")
-                #             function_response = function_to_call(
-                #                 user_email=email
-                #             )
-                #             self.is_email_added = True
-                #             self.file_name = str(email) + ".json"
-                #         elif function_name == 'save_chat_history':
-                #             email = function_args.get("email")
-                #             function_response = function_to_call(
-                #                 file_name_to_save=self.file_name,
-                #                 chat_summary=function_args.get("chat_summary")
-                #             )
-                #         elif function_name == 'get_location_coordinate':
-                #             function_response = function_to_call(
-                #                 location=function_args.get("location"),
-                #                 max_no_of_matched=function_args.get("max_no_of_matched"),
-                #             )
-                #         elif function_name == 'get_available_appointments':
-                #             function_response = function_to_call(
-                #                 latitude=function_args.get("latitude"),
-                #                 longitude=function_args.get("longitude"),
-                #                 state=function_args.get("state_abbreviation")
-                #             )
-                #
-                #         self.chatContext.append(
-                #             {
-                #                 "tool_call_id": tool_call.id,
-                #                 "role": "tool",
-                #                 "name": function_name,
-                #                 "content": function_response,
-                #             }
-                #         )
-                #     else:
-                #         print(f"Function {function_name} not found in available_functions")
-                # response = client.chat.completions.create(
-                #     model=model,
-                #     messages=self.chatContext,
-                #     temperature=temperature,
-                #     tools=tools,
-                #     tool_choice=tool_choice,
-                # )
-                # res = response.choices[0].message.content
-                # self.chatContext.append({"role": "assistant", "content": res})
-                # return res
 
         except Exception as e:
             print("Unable to generate ChatCompletion response")
