@@ -3,7 +3,7 @@ from flask import Flask, render_template, request
 from diagnostic_bot import Diagnostic_bot
 
 app = Flask(__name__)
-d_bot = Diagnostic_bot()
+d_bot = None
 
 def get_completion(prompt, model="gpt-3.5-turbo"):
     messages = {"role": "user", "content": prompt}
@@ -13,6 +13,8 @@ def get_completion(prompt, model="gpt-3.5-turbo"):
 
 @app.route("/")
 def home():
+    global d_bot 
+    d_bot =  Diagnostic_bot()
     return render_template("index.html")
 
 @app.route("/get")
