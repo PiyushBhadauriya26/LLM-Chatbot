@@ -106,7 +106,7 @@ class Diagnostic_bot:
                             user_email=email
                         )
                         self.is_email_added = True
-                        self.file_name = str(email) + ".json"
+                        self.file_name = f"chat_data/{email}.json"
                     elif function_name == 'save_chat_history':
                         email = function_args.get("email")
                         function_response = function_to_call(

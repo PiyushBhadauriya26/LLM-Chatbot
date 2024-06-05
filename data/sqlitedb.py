@@ -9,7 +9,7 @@
 import sqlite3
 
 class SqliteDB:
-    def __init__(self, db_name="appointments.db"):
+    def __init__(self, db_name="chat_data/appointments.db"):
         self.conn = sqlite3.connect(db_name, check_same_thread=False)
         self.cursor = self.conn.cursor()
         if not self.cursor:
