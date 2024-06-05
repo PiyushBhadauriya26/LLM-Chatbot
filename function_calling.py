@@ -39,7 +39,7 @@ def retrieve_knowledge(symptoms):
 
 
 def search_chat_history(user_email):
-    file = user_email + ".json"
+    file = f"chat_data/{user_email}.json"
     appointment = check_appointment(user_email)
     if os.path.isfile(file):
         with open(file, 'r+') as file:
